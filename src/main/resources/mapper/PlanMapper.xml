@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.genyuanlian.dao.PlanDao">
+    <resultMap id="BaseResultMap" type="com.genyuanlian.pojo.Plan">
+        <id column="id" property="id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="idx" property="idx" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="riqi" property="riqi" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="wriqi" property="wriqi" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="intro" property="intro" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="username" property="username" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="session_key" property="sessionKey" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="fine" property="fine" javaType="java.lang.Float" jdbcType="FLOAT" />
+        <result column="witness_fine" property="witnessFine" javaType="java.lang.Float" jdbcType="FLOAT" />
+        <result column="submit" property="submit" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="submit_time" property="submitTime" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="verify" property="verify" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="verify_intro" property="verifyIntro" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="verify_pic_path" property="verifyPicPath" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="verify_time" property="verifyTime" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="submit_txid" property="submitTxid" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="main_account_txid" property="mainAccountTxid" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="finish" property="finish" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="witness" property="witness" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="witness_num" property="witnessNum" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="witness_riqi" property="witnessRiqi" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="update_time" property="updateTime" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="raw_data" property="rawData" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="summary_data" property="summaryData" javaType="java.lang.String" jdbcType="VARCHAR" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, idx, riqi, wriqi, intro, username, session_key, fine, witness_fine, submit, submit_time, verify, verify_intro, verify_pic_path,
+        verify_time, submit_txid, main_account_txid, finish, witness, witness_num, witness_riqi, create_time, update_time,
+        raw_data, summary_data
+    </sql>
+    <select id="findById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from plan
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="findByUserName" parameterType="java.lang.String" resultMap="BaseResultMap" resultType="java.util.List">
+        select
+        <include refid="Base_Column_List" />
+        from plan
+        where username = #{username,jdbcType=VARCHAR}
+    </select>
+    <select id="findBySessionKey" parameterType="java.lang.String" resultMap="BaseResultMap" resultType="java.util.List">
+        select
+        <include refid="Base_Column_List" />
+        from plan
+        where session_key = #{sessionKey,jdbcType=VARCHAR}
+    </select>
+    <select id="findByNotSessionKey" parameterType="java.lang.String" resultMap="BaseResultMap" resultType="java.util.List">
+        select
+        <include refid="Base_Column_List" />
+        from plan
+        where session_key != #{sessionKey,jdbcType=VARCHAR}
+    </select>
+    <select id="findAll" parameterType="java.lang.String" resultMap="BaseResultMap" resultType="java.util.List">
+        select
+        <include refid="Base_Column_List" />
+        from plan
+    </select>
+    <insert id="insertPlan" parameterType="com.genyuanlian.pojo.Plan">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+        insert into plan(idx, riqi, wriqi, intro, username, session_key, fine, witness_fine, submit, submit_time, verify, verify_intro,
+        verify_pic_path, verify_time, submit_txid, finish, witness, witness_num, witness_riqi, create_time)
+        values (#{idx,jdbcType=INTEGER}, #{riqi,jdbcType=VARCHAR}, #{wriqi,jdbcType=VARCHAR},
+                #{intro,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR},
+                #{sessionKey,jdbcType=VARCHAR}, #{fine,jdbcType=FLOAT}, #{witnessFine,jdbcType=FLOAT},
+                #{submit,jdbcType=INTEGER}, #{submitTime,jdbcType=VARCHAR}, #{verify,jdbcType=INTEGER},
+                #{verifyIntro,jdbcType=VARCHAR}, #{verifyPicPath,jdbcType=VARCHAR}, #{verifyTime,jdbcType=VARCHAR},
+                #{submitTxid,jdbcType=VARCHAR}, #{finish,jdbcType=INTEGER}, #{witness,jdbcType=INTEGER},
+                #{witnessNum,jdbcType=INTEGER}, #{witnessRiqi,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR})
+    </insert>
+    <update id="updatePlan" parameterType="com.genyuanlian.pojo.Plan">
+        update plan
+        set idx = #{idx,jdbcType=INTEGER}, riqi = #{riqi,jdbcType=VARCHAR},
+            wriqi = #{wriqi,jdbcType=VARCHAR}, intro = #{intro,jdbcType=VARCHAR},
+            session_key = #{sessionKey,jdbcType=VARCHAR}, fine = #{fine,jdbcType=FLOAT}, witness_fine = #{witnessFine,jdbcType=FLOAT},
+            submit = #{submit,jdbcType=INTEGER}, submit_time = #{submitTime,jdbcType=VARCHAR}, verify = #{verify,jdbcType=INTEGER},
+            verify_intro = #{verifyIntro,jdbcType=VARCHAR}, verify_pic_path = #{verifyPicPath,jdbcType=VARCHAR},
+            verify_time = #{verifyTime,jdbcType=VARCHAR}, submit_txid = #{submitTxid,jdbcType=VARCHAR},
+            finish = #{finish,jdbcType=INTEGER}, witness = #{witness,jdbcType=INTEGER},
+            witness_num = #{witnessNum,jdbcType=INTEGER}, witness_riqi = #{witnessRiqi,jdbcType=VARCHAR},
+            update_time = #{updateTime,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateVerifyPic" parameterType="java.util.Map">
+        update plan
+        set verify = 1, verify_pic_path = #{verifyPicPath,jdbcType=VARCHAR},
+            verify_intro = #{verifyIntro,jdbcType=VARCHAR},verify_time = #{verify_time,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="submitPlan" parameterType="java.util.Map">
+        update plan
+        set submit = 1, finish = 1,
+            submit_time = #{submitTime,jdbcType=VARCHAR}, submit_txid = #{submitTxid,jdbcType=VARCHAR},
+            main_account_txid = #{mainAccountTxid,jdbcType=VARCHAR},
+            raw_data = #{rawData,jdbcType=VARCHAR}, summary_data = #{summaryData,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="finishPlan" parameterType="java.lang.Integer">
+        update plan
+        set finish = 1
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <delete id="deletePlan" parameterType="java.lang.Integer">
+        delete from plan
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+</mapper>

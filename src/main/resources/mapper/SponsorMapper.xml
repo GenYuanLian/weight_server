@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.genyuanlian.dao.SponsorDao">
+    <resultMap id="BaseResultMap" type="com.genyuanlian.pojo.Sponsor">
+        <id column="id" property="id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="plan_id" property="planId" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="username" property="username" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="session_key" property="sessionKey" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="sponsorship" property="sponsorShip" javaType="java.lang.Float" jdbcType="FLOAT" />
+        <result column="confirm" property="confirm" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="confirm_time" property="confirmTime" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="active" property="active" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, plan_id, username, session_key, sponsorship, confirm, confirm_time, active
+    </sql>
+    <select id="findById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from sponsor
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="findByUserName" parameterType="java.lang.String" resultMap="BaseResultMap" resultType="java.util.List">
+        select
+        <include refid="Base_Column_List" />
+        from sponsor
+        where username = #{username,jdbcType=VARCHAR}
+    </select>
+    <select id="findBySessionKey" parameterType="java.lang.String" resultMap="BaseResultMap" resultType="java.util.List">
+        select
+        <include refid="Base_Column_List" />
+        from sponsor
+        where session_key = #{sessionKey,jdbcType=VARCHAR}
+    </select>
+    <select id="findByPlanId" parameterType="java.lang.Integer" resultMap="BaseResultMap" resultType="java.util.List">
+        select
+        <include refid="Base_Column_List" />
+        from sponsor
+        where plan_id = #{planId,jdbcType=INTEGER}
+    </select>
+    <select id="findBySessionKeyAndPlanId" parameterType="java.util.Map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from sponsor
+        where plan_id = #{planId,jdbcType=INTEGER} and session_key = #{sessionKey,jdbcType=VARCHAR}
+    </select>
+    <insert id="insertSponsor" parameterType="com.genyuanlian.pojo.Sponsor">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+        insert into sponsor (plan_id, username, session_key, sponsorship, confirm, confirm_time, active)
+        values (#{planId,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR},
+                #{sessionKey,jdbcType=VARCHAR}, #{sponsorShip,jdbcType=FLOAT},
+                #{confirm,jdbcType=INTEGER}, #{confirmTime,jdbcType=VARCHAR},
+                #{active,jdbcType=INTEGER})
+    </insert>
+    <update id="updateSponsor" parameterType="java.util.Map">
+        update sponsor
+        set sponsorship = #{sponsorShip,jdbcType=FLOAT}, username = #{username,jdbcType=VARCHAR},
+            session_key = #{sessionKey,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="confirmSponsor" parameterType="java.util.Map">
+        update sponsor
+        set confirm = #{confirm,jdbcType=INTEGER}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <delete id="deleteSponsor" parameterType="java.lang.Integer">
+        delete from sponsor
+        where plan_id = #{planId,jdbcType=INTEGER}
+    </delete>
+    <delete id="deleteSponsors" parameterType="java.util.Map">
+        delete from sponsor
+        where plan_id = #{planId,jdbcType=INTEGER} and username = #{username,jdbcType=VARCHAR}
+    </delete>
+</mapper>

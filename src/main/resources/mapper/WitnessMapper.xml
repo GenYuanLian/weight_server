@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.genyuanlian.dao.WitnessDao">
+    <resultMap id="BaseResultMap" type="com.genyuanlian.pojo.Witness">
+        <id column="id" property="id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="plan_id" property="planId" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="username" property="username" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="session_key" property="sessionKey" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="confirm" property="confirm" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="confirm_time" property="confirmTime" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="judge" property="judge" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="judge_time" property="judgeTime" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="active" property="active" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, plan_id, username, session_key, confirm, confirm_time, judge, judge_time, active
+    </sql>
+    <select id="findById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from witness
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="findBySessionKey" parameterType="java.lang.String" resultMap="BaseResultMap" resultType="java.util.List">
+        select
+        <include refid="Base_Column_List" />
+        from witness
+        where session_key = #{sessionKey,jdbcType=VARCHAR}
+    </select>
+    <select id="findByPlanId" parameterType="java.lang.Integer" resultMap="BaseResultMap" resultType="java.util.List">
+        select
+        <include refid="Base_Column_List" />
+        from witness
+        where plan_id = #{planId,jdbcType=INTEGER}
+    </select>
+    <select id="findBySessionKeyAndPlanId" parameterType="java.util.Map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from witness
+        where plan_id = #{planId,jdbcType=INTEGER} and session_key = #{sessionKey,jdbcType=VARCHAR}
+    </select>
+    <insert id="insertWitness" parameterType="com.genyuanlian.pojo.Witness">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+        insert into witness (plan_id, username, session_key, confirm, confirm_time, active)
+        values (#{planId,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR},
+                #{sessionKey,jdbcType=VARCHAR}, #{confirm,jdbcType=INTEGER},
+                #{confirmTime,jdbcType=VARCHAR}, #{active,jdbcType=INTEGER})
+    </insert>
+    <update id="confirmWitness" parameterType="java.util.Map">
+        update witness
+        set confirm = #{confirm,jdbcType=INTEGER}, confirm_time = #{confirmTime,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="judgeWitness" parameterType="java.util.Map">
+        update witness
+        set judge = #{judge,jdbcType=INTEGER}, judge_time = #{judgeTime,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateWitness" parameterType="java.util.Map">
+        update witness
+        set username = #{username,jdbcType=VARCHAR}, session_key = #{sessionKey,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <delete id="deleteWitness" parameterType="java.lang.Integer">
+        delete from witness
+        where plan_id = #{planId,jdbcType=INTEGER}
+    </delete>
+    <delete id="deleteWitnesses" parameterType="java.util.Map">
+        delete from witness
+        where plan_id = #{planId,jdbcType=INTEGER} and username = #{username,jdbcType=VARCHAR}
+    </delete>
+</mapper>

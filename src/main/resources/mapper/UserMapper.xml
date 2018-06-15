@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.genyuanlian.dao.UserDao">
+  <resultMap id="BaseResultMap" type="com.genyuanlian.pojo.User">
+    <id column="id" property="id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="username" property="username" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="password" property="password" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="session_key" property="sessionKey" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="wallet" property="wallet" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="pubaddr" property="pubAddr" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="total_balance" property="totalBalance" javaType="java.lang.Float" jdbcType="FLOAT" />
+    <result column="available_balance" property="availableBalance" javaType="java.lang.Float" jdbcType="FLOAT" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, username, password, session_key, wallet, pubaddr, total_balance, available_balance
+  </sql>
+  <select id="getAllUsers" parameterType="java.lang.String" resultMap="BaseResultMap" resultType="java.util.List">
+    select
+    <include refid="Base_Column_List" />
+    from user
+  </select>
+  <select id="getByUserName" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from user
+    where username = #{username,jdbcType=VARCHAR}
+  </select>
+  <select id="getBySessionKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from user
+    where session_key = #{sessionKey,jdbcType=VARCHAR}
+  </select>
+  <select id="getByUserNameAndPassword" parameterType="com.genyuanlian.pojo.LoginRegistData" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from user
+    where username = #{username,jdbcType=VARCHAR} and password = #{password,jdbcType=VARCHAR}
+  </select>
+  <select id="getWalletPubAddr" parameterType="java.lang.String" resultType="java.lang.String">
+    select pubaddr from user
+    where session_key = #{sessionKey,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from user
+    where username = #{username,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.genyuanlian.pojo.User">
+    insert into user (username, password, session_key, wallet, pubaddr, total_balance, available_balance)
+    values (#{username,jdbcType=VARCHAR},
+            #{password,jdbcType=VARCHAR}, #{sessionKey,jdbcType=VARCHAR},
+            #{wallet,jdbcType=VARCHAR}, #{pubAddr,jdbcType=VARCHAR},
+            #{totalBalance,jdbcType=FLOAT}, #{availableBalance,jdbcType=FLOAT})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.genyuanlian.pojo.User">
+    update user
+    set username = #{username,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      session_key = #{sessionKey,jdbcType=VARCHAR},
+      wallet = #{wallet,jdbcType=VARCHAR},
+      pubaddr = #{pubAddr,jdbcType=VARCHAR},
+      total_balance = #{totalBalance,jdbcType=VARCHAR},
+      available_balance = #{availableBalance,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
