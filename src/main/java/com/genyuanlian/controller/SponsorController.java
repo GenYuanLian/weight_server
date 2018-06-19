@@ -38,11 +38,16 @@ public class SponsorController {
     @ResponseBody
     public int confirmSponsor(HttpServletRequest request) {
         int id = Integer.parseInt(request.getParameter("id"));
+        int confirm = Integer.parseInt(request.getParameter("confirm"));
+        int verify = -1;
+        if (request.getParameter("verify") != null) {
+            verify = Integer.parseInt(request.getParameter("verify"));
+        }
         Map map = new HashMap<>();
         map.put("id", id);
-        map.put("confirm", 1);
+        map.put("confirm", confirm);
         map.put("confirmTime", DateUtil.formatDate(new Date()));
-        return sponsorService.confirmSponsor(map);
+        return sponsorService.confirmSponsor(map, verify);
     }
 
 }

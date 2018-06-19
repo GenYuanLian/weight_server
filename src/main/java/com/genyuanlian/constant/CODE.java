@@ -31,6 +31,8 @@ public class CODE {
     public static final int USER_WITHDRAW_FAIL = -19;  //用户提现失败
     public static final int PLAN_SPONSOR_EXIST = -20;  //计划用户已经赞助了
     public static final int PLAN_WITNESS_EXIST = -21;  //计划用户已经见证了
+    public static final int PLAN_NO_SPONSOR_OR_WITNESS = -22;   //计划没有赞助人或者见证人
+    public static final int PLAN_NO_VALID_WITNESS = -23;   //计划没有有效的见证人
 
     public static final Map<String, Integer> CODEMAP = new HashMap<String, Integer>();
 

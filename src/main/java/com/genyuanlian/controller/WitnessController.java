@@ -38,9 +38,10 @@ public class WitnessController {
     @ResponseBody
     public int confirmWitness(HttpServletRequest request) {
         int id = Integer.parseInt(request.getParameter("id"));
+        int confirm = Integer.parseInt(request.getParameter("confirm"));
         Map map = new HashMap<>();
         map.put("id", id);
-        map.put("confirm", 1);
+        map.put("confirm", confirm);
         map.put("confirmTime", DateUtil.formatDate(new Date()));
         return witnessService.confirmWitness(map);
     }

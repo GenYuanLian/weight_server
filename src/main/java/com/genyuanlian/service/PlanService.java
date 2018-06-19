@@ -2,10 +2,7 @@ package com.genyuanlian.service;
 
 import com.genyuanlian.constant.CODE;
 import com.genyuanlian.constant.Constant;
-import com.genyuanlian.dao.SponsorDao;
-import com.genyuanlian.dao.PlanDao;
-import com.genyuanlian.dao.UserDao;
-import com.genyuanlian.dao.WitnessDao;
+import com.genyuanlian.dao.*;
 import com.genyuanlian.pojo.*;
 import com.genyuanlian.utils.DateUtil;
 import org.apache.catalina.authenticator.SpnegoAuthenticator;
@@ -13,6 +10,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.hibernate.validator.internal.constraintvalidators.bv.past.PastValidatorForReadableInstant;
+import org.hibernate.validator.valuehandling.UnwrapValidatedValue;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +45,9 @@ public class PlanService {
 
     @Autowired
     private WitnessDao witnessDao;
+
+    @Autowired
+    private IncomeDao incomeDao;
 
     @Autowired
     private WalletService walletService;
@@ -253,6 +255,28 @@ public class PlanService {
                 return data;
             }
 
+            boolean hasSponsor = false;
+            for (Sponsor sponsor : sponsors) {
+                if (sponsor.getConfirm() == 0 || sponsor.getConfirm() == 1) {
+                    hasSponsor = true;
+                    break;
+                }
+            }
+
+            boolean hasWitness = false;
+            for (Witness witness : witnesses) {
+                if (witness.getConfirm() == 0 || witness.getConfirm() == 1) {
+                    hasWitness = true;
+                    break;
+                }
+            }
+
+            if (!hasSponsor || !hasWitness) {
+                data.setMessage("没有赞助人或者见证人参与，请增加赞助人或者见证人");
+                data.setStatus(CODE.PLAN_NO_SPONSOR_OR_WITNESS);
+                return data;
+            }
+
             planDao.updatePlan(plan);
 
             for (Sponsor sponsor : sponsors) {
@@ -402,7 +426,7 @@ public class PlanService {
             // 计划是否还有见证人没有给出评判结果
             isOk = true;
             for (Witness witness : witnesses) {
-                if (witness.getJudge() == 0) {
+                if (witness.getJudge() == 0 && witness.getConfirm() != 2) {
                     isOk = false;
                     message = "计划还有见证人没有给出评判结果";
                     resData.setMessage(message);
@@ -481,6 +505,8 @@ public class PlanService {
                 }
             }
 
+            String txid;
+
             if (judge1 > judge2) {
                 /* 计划通过
                    赞助人给执行人赞助金
@@ -492,24 +518,83 @@ public class PlanService {
                 float num;
                 Random random = new Random();
                 float percent = (10 + random.nextInt(40)) / 1000.0f;
+                float sum = 0.0f;
                 for (Sponsor sponsor : sponsors) {
                     num = (sponsor.getSponsorShip() * percent) / judge1;
+                    sum += num;
                     user = userDao.getBySessionKey(sponsor.getSessionKey());
                     for (Witness witness : witnesses) {
                         if (witness.getJudge() == 1) {
                             User user1 = userDao.getBySessionKey(witness.getSessionKey());
-                            walletService.transferWallet(user.getWallet(), user1.getPubAddr(), num);
+                            txid = walletService.transferWallet(user.getWallet(), user1.getPubAddr(), num);
+
+                            Income income = new Income();
+                            income.setPlanId(id);
+                            income.setUsername(user1.getUsername());
+                            income.setSessionKey(user1.getSessionKey());
+                            income.setNum(num);
+                            income.setRole(2);
+                            income.setTxid(txid);
+                            incomeDao.insertIncome(income);
+
+                            income = new Income();
+                            income.setPlanId(id);
+                            income.setUsername(user.getUsername());
+                            income.setSessionKey(user.getSessionKey());
+                            income.setNum(-num);
+                            income.setRole(1);
+                            income.setTxid(txid);
+                            incomeDao.insertIncome(income);
                         }
                     }
                 }
 
+                for (Witness witness : witnesses) {
+                    if (witness.getJudge() == 1) {
+                        user = userDao.getBySessionKey(witness.getSessionKey());
+                        user.setIncome(user.getIncome() + sum);
+                        userDao.updateByPrimaryKey(user);
+                    }
+                }
+
                 // 给执行人赞助金
+                sum = 0.0f;
                 for (Sponsor sponsor : sponsors) {
                     num = sponsor.getSponsorShip() * (1.0f - percent);
+                    sum += num;
                     user = userDao.getBySessionKey(sponsor.getSessionKey());
                     User user1 = userDao.getBySessionKey(plan.getSessionKey());
-                    walletService.transferWallet(user.getWallet(), user1.getPubAddr(), num);
+                    txid = walletService.transferWallet(user.getWallet(), user1.getPubAddr(), num);
+
+                    Income income = new Income();
+                    income.setPlanId(id);
+                    income.setUsername(user1.getUsername());
+                    income.setSessionKey(user1.getSessionKey());
+                    income.setNum(num);
+                    income.setRole(0);
+                    income.setTxid(txid);
+                    incomeDao.insertIncome(income);
+
+                    income = new Income();
+                    income.setPlanId(id);
+                    income.setUsername(user.getUsername());
+                    income.setSessionKey(user.getSessionKey());
+                    income.setNum(-num);
+                    income.setRole(1);
+                    income.setTxid(txid);
+                    incomeDao.insertIncome(income);
                 }
+
+                user = userDao.getBySessionKey(plan.getSessionKey());
+                user.setIncome(user.getIncome() + sum);
+                userDao.updateByPrimaryKey(user);
+
+                for (Sponsor sponsor : sponsors) {
+                    user = userDao.getBySessionKey(sponsor.getSessionKey());
+                    user.setIncome(user.getIncome() - sponsor.getSponsorShip());
+                    userDao.updateByPrimaryKey(user);
+                }
+
             } else if (judge1 < judge2){
                 /* 计划不通过
                    执行人给赞助人违约金
@@ -524,9 +609,31 @@ public class PlanService {
                 num = (plan.getFine() * percent) / judge2;
                 user = userDao.getBySessionKey(plan.getSessionKey());
                 for (Witness witness : witnesses) {
-                    if (witness.getJudge() == 0) {
+                    if (witness.getJudge() == 2) {
                         User user1 = userDao.getBySessionKey(witness.getSessionKey());
-                        walletService.transferWallet(user.getWallet(), user1.getPubAddr(), num);
+                        txid = walletService.transferWallet(user.getWallet(), user1.getPubAddr(), num);
+
+                        Income income = new Income();
+                        income.setPlanId(id);
+                        income.setUsername(user1.getUsername());
+                        income.setSessionKey(user1.getSessionKey());
+                        income.setNum(num);
+                        income.setRole(2);
+                        income.setTxid(txid);
+                        incomeDao.insertIncome(income);
+
+                        income = new Income();
+                        income.setPlanId(id);
+                        income.setUsername(user.getUsername());
+                        income.setSessionKey(user.getSessionKey());
+                        income.setNum(-num);
+                        income.setRole(0);
+                        income.setTxid(txid);
+                        incomeDao.insertIncome(income);
+
+                        User user2 = userDao.getBySessionKey(witness.getSessionKey());
+                        user2.setIncome(user2.getIncome() + num);
+                        userDao.updateByPrimaryKey(user2);
                     }
                 }
 
@@ -534,8 +641,33 @@ public class PlanService {
                 num = (plan.getFine() * (1.0f - percent)) / sponsors.size();
                 for (Sponsor sponsor : sponsors) {
                     User user1 = userDao.getBySessionKey(sponsor.getSessionKey());
-                    walletService.transferWallet(user.getWallet(), user1.getPubAddr(), num);
+                    txid = walletService.transferWallet(user.getWallet(), user1.getPubAddr(), num);
+
+                    Income income = new Income();
+                    income.setPlanId(id);
+                    income.setUsername(user1.getUsername());
+                    income.setSessionKey(user1.getSessionKey());
+                    income.setNum(num);
+                    income.setRole(1);
+                    income.setTxid(txid);
+                    incomeDao.insertIncome(income);
+
+                    income = new Income();
+                    income.setPlanId(id);
+                    income.setUsername(user.getUsername());
+                    income.setSessionKey(user.getSessionKey());
+                    income.setNum(-num);
+                    income.setRole(0);
+                    income.setTxid(txid);
+                    incomeDao.insertIncome(income);
+
+                    user1.setIncome(user1.getIncome() + num);
+                    userDao.updateByPrimaryKey(user1);
                 }
+
+                user.setIncome(user.getIncome() - plan.getFine());
+                userDao.updateByPrimaryKey(user);
+
             } else {
                 /*
                  * 计划通过和不通过数相等，没有得出哪方获胜结果

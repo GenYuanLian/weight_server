@@ -21,6 +21,8 @@ public class User {
 
     private float availableBalance;
 
+    private float income;
+
     public int getId() {
         return id;
     }
@@ -83,5 +85,13 @@ public class User {
 
     public void setAvailableBalance(float availableBalance) {
         this.availableBalance = availableBalance;
+    }
+
+    public float getIncome() {
+        return income;
+    }
+
+    public void setIncome(float income) {
+        this.income = income;
     }
 }

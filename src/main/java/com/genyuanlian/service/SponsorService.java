@@ -6,6 +6,7 @@ import com.genyuanlian.dao.PlanDao;
 import com.genyuanlian.dao.WitnessDao;
 import com.genyuanlian.pojo.Sponsor;
 import com.genyuanlian.pojo.Plan;
+import com.genyuanlian.pojo.Witness;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,8 +59,23 @@ public class SponsorService {
      * @param map
      * @return
      */
-    public int confirmSponsor(Map map) {
+    public int confirmSponsor(Map map, int verify) {
         try {
+            if (verify == 0) {
+                int id = (int) map.get("id");
+                Sponsor sponsor = sponsorDao.findById(id);
+                List<Witness> witnesses = witnessDao.findByPlanId(sponsor.getPlanId());
+                boolean hasWitness = false;
+                for (Witness witness : witnesses) {
+                    if (witness.getConfirm() == 1) {
+                        hasWitness = true;
+                        break;
+                    }
+                }
+                if (!hasWitness) {
+                    return CODE.PLAN_NO_VALID_WITNESS;
+                }
+            }
             sponsorDao.confirmSponsor(map);
             return CODE.SUCCESS;
         } catch (Exception e) {

@@ -10,9 +10,10 @@
     <result column="pubaddr" property="pubAddr" javaType="java.lang.String" jdbcType="VARCHAR" />
     <result column="total_balance" property="totalBalance" javaType="java.lang.Float" jdbcType="FLOAT" />
     <result column="available_balance" property="availableBalance" javaType="java.lang.Float" jdbcType="FLOAT" />
+    <result column="income" property="income" javaType="java.lang.Float" jdbcType="FLOAT" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, username, password, session_key, wallet, pubaddr, total_balance, available_balance
+    id, username, password, session_key, wallet, pubaddr, total_balance, available_balance, income
   </sql>
   <select id="getAllUsers" parameterType="java.lang.String" resultMap="BaseResultMap" resultType="java.util.List">
     select
@@ -46,11 +47,11 @@
     where username = #{username,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="com.genyuanlian.pojo.User">
-    insert into user (username, password, session_key, wallet, pubaddr, total_balance, available_balance)
-    values (#{username,jdbcType=VARCHAR},
-            #{password,jdbcType=VARCHAR}, #{sessionKey,jdbcType=VARCHAR},
-            #{wallet,jdbcType=VARCHAR}, #{pubAddr,jdbcType=VARCHAR},
-            #{totalBalance,jdbcType=FLOAT}, #{availableBalance,jdbcType=FLOAT})
+    insert into user (username, password, session_key, wallet, pubaddr, total_balance, available_balance, income)
+    values (#{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
+            #{sessionKey,jdbcType=VARCHAR}, #{wallet,jdbcType=VARCHAR},
+            #{pubAddr,jdbcType=VARCHAR}, #{totalBalance,jdbcType=FLOAT},
+            #{availableBalance,jdbcType=FLOAT}, #{income,jdbcType=FLOAT})
   </insert>
   <update id="updateByPrimaryKey" parameterType="com.genyuanlian.pojo.User">
     update user
@@ -60,7 +61,8 @@
       wallet = #{wallet,jdbcType=VARCHAR},
       pubaddr = #{pubAddr,jdbcType=VARCHAR},
       total_balance = #{totalBalance,jdbcType=VARCHAR},
-      available_balance = #{availableBalance,jdbcType=VARCHAR}
+      available_balance = #{availableBalance,jdbcType=VARCHAR},
+      income = #{income,jdbcType=VARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>

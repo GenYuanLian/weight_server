@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.genyuanlian.dao.IncomeDao">
+    <resultMap id="BaseResultMap" type="com.genyuanlian.pojo.Income">
+        <id column="id" property="id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="plan_id" property="planId" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="username" property="username" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="session_key" property="sessionKey" javaType="java.lang.String" jdbcType="VARCHAR" />
+        <result column="num" property="num" javaType="java.lang.Float" jdbcType="FLOAT" />
+        <result column="role" property="role" javaType="java.lang.Integer" jdbcType="INTEGER" />
+        <result column="txid" property="txid" javaType="java.lang.String" jdbcType="VARCHAR" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, plan_id, username, session_key, num, role, txid
+    </sql>
+    <select id="findById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from income
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="findByUserName" parameterType="java.lang.String" resultMap="BaseResultMap" resultType="java.util.List">
+        select
+        <include refid="Base_Column_List" />
+        from income
+        where username = #{username,jdbcType=VARCHAR}
+    </select>
+    <select id="findBySessionKey" parameterType="java.lang.String" resultMap="BaseResultMap" resultType="java.util.List">
+        select
+        <include refid="Base_Column_List" />
+        from income
+        where session_key = #{sessionKey,jdbcType=VARCHAR}
+    </select>
+    <select id="findBySessionKeyAndPlanId" parameterType="java.util.Map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from income
+        where plan_id = #{planId,jdbcType=INTEGER} and session_key = #{sessionKey,jdbcType=VARCHAR}
+    </select>
+    <insert id="insertIncome" parameterType="com.genyuanlian.pojo.Income">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+        insert into income (plan_id, username, session_key, num, role, txid)
+        values (#{planId,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR},
+                #{sessionKey,jdbcType=VARCHAR}, #{num,jdbcType=FLOAT},
+                #{role,jdbcType=INTEGER}, #{txid,jdbcType=VARCHAR})
+    </insert>
+</mapper>
